@@ -23,6 +23,7 @@ function getPriorityBorderColor(priority) {
     }
 }
 
+// Component for the undo notification toast
 function UndoNotification({ closeToast, data }) {
     function handleUndo() {
         data.onUndo();
@@ -43,11 +44,16 @@ function UndoNotification({ closeToast, data }) {
 }
 
 function Task({ id, title, description, priority, dueDate, checked }) {
+    // State for task completion
     const [checkState, setCheckState] = useState(checked);
-    const [isVisible, setIsVisible] = useState(true); // Optimistic UI updates
+    // State for task visibility (used for optimistic UI updates)
+    const [isVisible, setIsVisible] = useState(true);
+    // State for edit modal
     const [isEditOpen, setIsEditOpen] = useState(false);
+    // Reference to the task document in Firebase
     const taskDocRef = doc(db, "tasks", id);
 
+    // Handle task completion toggle
     async function handleCheckState() {
         if (checkState) {
             setCheckState(false); // Optimistic UI update
@@ -58,7 +64,9 @@ function Task({ id, title, description, priority, dueDate, checked }) {
         }
     }
 
+    // Handle task deletion with confirmation and undo functionality
     async function handleDelete() {
+        // Show confirmation dialog using SweetAlert2
         const { isConfirmed } = await Swal.fire({
             title: "Confirm Delete",
             text: "Are you sure you want to delete this task?",
@@ -67,31 +75,40 @@ function Task({ id, title, description, priority, dueDate, checked }) {
             confirmButtonColor: "#fb2c36",
         });
 
+        // If user cancels, return early
         if (!isConfirmed) {
             return;
         }
 
+        // Optimistically hide the task from UI
         setIsVisible(false);
+
+        // Show toast notification with undo option
         toast.info(UndoNotification, {
             onClose: (removedByUser) => {
+                // If toast was manually closed, don't delete the task
                 if (removedByUser) {
                     return;
                 }
 
+                // Delete the task from Firebase
                 deleteDoc(taskDocRef);
             },
             data: {
+                // Function to restore task visibility if undo is clicked
                 onUndo: () => setIsVisible(true),
             },
         });
     }
 
+    // If task is not visible (deleted), don't render it
     if (!isVisible) return null;
 
     return (
         <li className="mb-4 rounded-lg shadow-md overflow-hidden">
             <div className={clsx("flex border-l-4", getPriorityBorderColor(priority))}>
                 <div className="flex gap-2 flex-1 p-4">
+                    {/* Task completion checkbox */}
                     <input
                         type="checkbox"
                         checked={checkState}
@@ -119,13 +136,16 @@ function Task({ id, title, description, priority, dueDate, checked }) {
                     </div>
                 </div>
 
+                {/* Task action buttons */}
                 <div className="flex flex-col justify-center space-y-2 px-2">
+                    {/* Edit button */}
                     <button
                         className="block cursor-pointer hover:scale-110 transition-all"
                         onClick={() => setIsEditOpen((prev) => !prev)}
                     >
                         <img className="w-5 h-5" src={PencilIcon} alt="edit" />
                     </button>
+                    {/* Delete button */}
                     <button
                         className="block cursor-pointer hover:scale-110 transition-all"
                         onClick={handleDelete}
@@ -134,6 +154,7 @@ function Task({ id, title, description, priority, dueDate, checked }) {
                     </button>
                 </div>
             </div>
+            {/* Edit task form modal */}
             <TaskForm
                 initialData={{
                     id,

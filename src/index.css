@@ -1,13 +1,21 @@
+/* Import Google Fonts for the application */
 @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
+/* Import Tailwind CSS framework */
 @import "tailwindcss";
 
+/* Global styles for all elements */
 * {
+    /* Set the default font family to Poppins */
     font-family: "Poppins", sans-serif;
+    /* Enable automatic font size adjustment based on viewport */
     font-optical-sizing: auto;
+    /* Set default font style to normal */
     font-style: normal;
 }
 
+/* Custom styling for date input picker */
 input[type="date"]::-webkit-calendar-picker-indicator {
+    /* Adjust the position of the calendar picker icon */
     margin-left: -10px;
 }
